@@ -76,14 +76,23 @@ def find_animal(circ, animal):
             rectY += i[0][1]
         rectX /= 4
         rectY /= 4
-        # for i in animal.animals:
-        #     cv2.line(im, (int(rectX+circ.x), int(rectY+circ.y)), (i[0], i[1]), animal.color, 5)
-        # animal.animals.append([int(rectX + circ.x), int(rectY + circ.y)])
         return (int(rectX + circ.x), int(rectY + circ.y))
     return None
 
 
-im = cv2.imread('pics/1.jpg')
+def find_animal_list(circles, animal):
+    for circ in circles:
+        coords = find_animal(circ, animal)
+        if coords is not None:
+            animal.animals.append(coords)
+
+
+def write_animal_names(animal, im):
+    for a in animal.animals:
+        cv2.putText(im, animal.pic[5:-4], (a[0], a[1]), cv2.FONT_HERSHEY_SIMPLEX, 2, animal.color, 2, cv2.LINE_AA)
+
+
+im = cv2.imread('pics/10.jpg')
 im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
 imgray = cv2.cvtColor(im, cv2.COLOR_RGB2GRAY)
 ret, thresh = cv2.threshold(imgray, 192, 255, 0)
@@ -115,22 +124,27 @@ for c in contours:
     circles.append(circle)
 
 animals = [Animal('pics/osiol.png', (255, 0, 0)),
-           Animal('pics/mewa.png', (0,255,0)),
+           Animal('pics/mewa.png', (0, 255, 0)),
            Animal('pics/delfin.png', (0, 0, 255)),
-           Animal('pics/flaming.png', (120,255,0)),
+           Animal('pics/flaming.png', (120, 255, 0)),
            Animal('pics/foka.png', (50, 0, 110)),
            Animal('pics/pingwin.png', (110, 50, 0)),
-           Animal('pics/wiewiorka.png', (255,0,255)),
-           Animal('pics/zaba.png', (0,255,255)),
-           Animal('pics/zolw.png', (255,255,0))]
+           Animal('pics/wiewiorka.png', (255, 0, 255)),
+           Animal('pics/zaba.png', (0, 255, 255)),
+           Animal('pics/zolw.png', (255, 255, 0)),
+           Animal('pics/goryl.png', (120, 0, 40)),
+           Animal('pics/krab.png', (244, 116, 65)),
+           Animal('pics/leniwiec.png', (244, 66, 229)),
+           Animal('pics/hipcio.png', (238, 244, 66))]
 
 center_animals = find_center_animals(center_circle, animals)
 for animal in center_animals:
-    for circ in circles:
-        coords = find_animal(circ, animal)
-        if coords is not None:
-            animal.animals.append(coords)
+    find_animal_list(circles, animal)
     for i in animal.animals:
         cv2.line(im, animal.center, (i[0], i[1]), animal.color, 5)
+circles.append(center_circle)
+for i in range(3):
+    find_animal_list(circles, animals[i])
+    write_animal_names(animals[i],im)
 plt.imshow(im)
 plt.show()
