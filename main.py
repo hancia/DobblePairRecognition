@@ -27,10 +27,14 @@ def find_circle(c):
 def find_center_animals(center_circle, animals):
     center_animals = []
     for animal in animals:
-        animal_coords = find_animal(center_circle, animal)
-        if animal_coords is not None:
-            animal.center = animal_coords
-            center_animals.append(animal)
+        try:
+            animal_coords = find_animal(center_circle, animal)
+            if animal_coords is not None:
+                animal.center = animal_coords
+                center_animals.append(animal)
+        except:
+            pass
+
     return center_animals
 
 
@@ -82,9 +86,12 @@ def find_animal(circ, animal):
 
 def find_animal_list(circles, animal):
     for circ in circles:
-        coords = find_animal(circ, animal)
-        if coords is not None:
-            animal.animals.append(coords)
+        try:
+            coords = find_animal(circ, animal)
+            if coords is not None:
+                animal.animals.append(coords)
+        except:
+            pass
 
 
 def write_animal_names(animal, im):
@@ -92,17 +99,19 @@ def write_animal_names(animal, im):
         cv2.putText(im, animal.pic[5:-4], (a[0], a[1]), cv2.FONT_HERSHEY_SIMPLEX, 2, animal.color, 2, cv2.LINE_AA)
 
 
-im = cv2.imread('pics/10.jpg')
+im = cv2.imread('pics/14.jpg')
 im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
 imgray = cv2.cvtColor(im, cv2.COLOR_RGB2GRAY)
 ret, thresh = cv2.threshold(imgray, 192, 255, 0)
+# plt.imshow(thresh)
+# plt.show()
 im2, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 height = im.shape[0]
 width = im.shape[1]
 center = [width / 2, height / 2]
 center_contour = contours[0]
 mindistance = abs(center[1] - center_contour[0][0][1]) + abs(center[0] - center_contour[0][0][0])
-contours = list(filter(lambda x: cv2.contourArea(x) >= 100, contours))
+contours = list(filter(lambda x: cv2.contourArea(x) >= 200, contours))
 
 position = 0
 for i, con in enumerate(contours):
@@ -118,23 +127,18 @@ center_circle = find_circle(center_contour)
 del contours[position]
 circles = []
 for c in contours:
-    x, y, w, h = cv2.boundingRect(c)
-    crop = im[y:y + h, x:x + w]
-    circle = Circle(crop, x, y)
+    circle = find_circle(c)
     circles.append(circle)
 
-animals = [Animal('pics/osiol.png', (255, 0, 0)),
-           Animal('pics/mewa.png', (0, 255, 0)),
-           Animal('pics/delfin.png', (0, 0, 255)),
-           Animal('pics/flaming.png', (120, 255, 0)),
-           Animal('pics/foka.png', (50, 0, 110)),
-           Animal('pics/pingwin.png', (110, 50, 0)),
-           Animal('pics/wiewiorka.png', (255, 0, 255)),
-           Animal('pics/zaba.png', (0, 255, 255)),
-           Animal('pics/zolw.png', (255, 255, 0)),
-           Animal('pics/goryl.png', (120, 0, 40)),
-           Animal('pics/krab.png', (244, 116, 65)),
-           Animal('pics/leniwiec.png', (244, 66, 229)),
+animals = [Animal('pics/osiol.png', (255, 0, 0)), Animal('pics/mewa.png', (0, 255, 0)),
+           Animal('pics/delfin.png', (0, 0, 255)), Animal('pics/flaming.png', (120, 255, 0)),
+           Animal('pics/foka.png', (50, 0, 110)), Animal('pics/pingwin.png', (110, 50, 0)),
+           Animal('pics/wiewiorka.png', (255, 0, 255)), Animal('pics/zaba.png', (0, 255, 255)),
+           Animal('pics/zolw.png', (255, 255, 0)), Animal('pics/goryl.png', (120, 0, 40)),
+           Animal('pics/krab.png', (244, 116, 65)), Animal('pics/leniwiec.png', (244, 66, 229)),
+           Animal('pics/jelen.png', (244, 152, 66)), Animal('pics/kaczor.png', (125, 65, 244)),
+           Animal('pics/niedzwiedz.png', (207, 242, 70)), Animal('pics/okon.png', (114, 42, 40)),
+           Animal('pics/orka.png', (155, 6, 140)), Animal('pics/orzel.png', (37, 73, 38)),
            Animal('pics/hipcio.png', (238, 244, 66))]
 
 center_animals = find_center_animals(center_circle, animals)
@@ -145,6 +149,6 @@ for animal in center_animals:
 circles.append(center_circle)
 for i in range(3):
     find_animal_list(circles, animals[i])
-    write_animal_names(animals[i],im)
+    write_animal_names(animals[i], im)
 plt.imshow(im)
 plt.show()
