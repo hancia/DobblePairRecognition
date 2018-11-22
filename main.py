@@ -99,19 +99,40 @@ def write_animal_names(animal, im):
         cv2.putText(im, animal.pic[5:-4], (a[0], a[1]), cv2.FONT_HERSHEY_SIMPLEX, 2, animal.color, 2, cv2.LINE_AA)
 
 
-im = cv2.imread('pics/14.jpg')
+filename = 'pics/15.jpg'
+im = cv2.imread(filename)
 im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
 imgray = cv2.cvtColor(im, cv2.COLOR_RGB2GRAY)
-ret, thresh = cv2.threshold(imgray, 192, 255, 0)
-# plt.imshow(thresh)
-# plt.show()
+
+imbrightness = cv2.mean(im)
+sum = 0
+for i in imbrightness:
+    sum += i
+sum /= 50
+print(sum)
+ret, thresh = cv2.threshold(imgray, 192-sum, 255, 0)
+plt.imshow(thresh)
+plt.show()
 im2, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+contours = list(filter(lambda x: cv2.contourArea(x) >= 300, contours))
+
+# centerx = 0
+# centery = 0
+# for con in contours:
+#     c = con[0][0]
+#     centerx += c[0]
+#     centery += c[1]
+#
+# centerx = int(centerx/len(contours))
+# centery = int(centery/len(contours))
+# center = [centerx, centery]
 height = im.shape[0]
 width = im.shape[1]
 center = [width / 2, height / 2]
+
 center_contour = contours[0]
 mindistance = abs(center[1] - center_contour[0][0][1]) + abs(center[0] - center_contour[0][0][0])
-contours = list(filter(lambda x: cv2.contourArea(x) >= 200, contours))
 
 position = 0
 for i, con in enumerate(contours):
@@ -122,12 +143,18 @@ for i, con in enumerate(contours):
         mindistance = distance
         position = i
 # cv2.drawContours(im, contours, -1, (0, 0, 255), 20)
+# plt.imshow(im)
+# plt.show()
 
 center_circle = find_circle(center_contour)
+plt.imshow(center_circle.cont)
+plt.show()
 del contours[position]
 circles = []
 for c in contours:
     circle = find_circle(c)
+    # plt.imshow(circle.cont)
+    # plt.show()
     circles.append(circle)
 
 animals = [Animal('pics/osiol.png', (255, 0, 0)), Animal('pics/mewa.png', (0, 255, 0)),
@@ -152,3 +179,5 @@ for i in range(3):
     write_animal_names(animals[i], im)
 plt.imshow(im)
 plt.show()
+im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
+cv2.imwrite("pics/wynik" + filename[5:], im)
